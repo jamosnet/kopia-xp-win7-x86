@@ -1,0 +1,61 @@
+name: Build Kopia CLI for WinXP x86
+
+on:
+  workflow_dispatch: # 手动触发构建
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          ref: v0.12.1 # 锁定 Kopia v0.12.1 版本
+
+      - name: Setup Bootstrap Go
+        uses: actions/setup-go@v5
+        with:
+          # 我们需要一个官方的 Go 环境来作为“引导编译器(Bootstrap)”
+          go-version: '1.20.14'
+
+      - name: Build XP-compatible Go Toolchain
+        run: |
+          # 克隆支持 WinXP 的非官方 Go 1.20 分支 (nt51 代表 Windows NT 5.1 即 XP)
+          git clone --branch release-branch.go1.20-nt51 --single-branch https://github.com/BieHDC/go-backports.git $GITHUB_WORKSPACE/go-xp
+          cd $GITHUB_WORKSPACE/go-xp/src
+          
+          # 指定刚才安装的官方 Go 为引导程序，并从源码编译这个定制版 Go 环境
+          export GOROOT_BOOTSTRAP=$(go env GOROOT)
+          ./make.bash
+
+      - name: Install Dependencies
+        run: |
+          # 覆盖环境变量，强制接下来的步骤使用我们刚编译出来的定制版 Go
+          export GOROOT=$GITHUB_WORKSPACE/go-xp
+          export PATH=$GOROOT/bin:$PATH
+          
+          # 下载依赖
+          go mod download
+
+      - name: Build Kopia CLI (WinXP x86)
+        env:
+          GOOS: windows
+          GOARCH: 386 # 32位架构
+          GO386: softfloat # 极其重要：放弃 SSE2 硬件加速。XP 时代有很多老 CPU (如奔腾3/AMD Geode) 不支持 SSE2，softfloat 可确保最大兼容。
+          CGO_ENABLED: 0 # 关闭 CGO
+        run: |
+          # 再次确保使用定制版的 Go 进行最终编译
+          export GOROOT=$GITHUB_WORKSPACE/go-xp
+          export PATH=$GOROOT/bin:$PATH
+          
+          BUILD_TIME=$(date -u +%Y%m%d-%H%M%S)
+          LDFLAGS="-s -w -X github.com/kopia/kopia/repo.BuildVersion=0.12.1-winxp-x86 -X github.com/kopia/kopia/repo.BuildInfo=$BUILD_TIME"
+          
+          # 编译输出为 kopia-xp.exe
+          go build -o kopia-xp.exe -ldflags "$LDFLAGS" .
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kopia-winxp-x86-cli
+          path: kopia-xp.exe
