@@ -1,0 +1,43 @@
+name: Build Kopia CLI for Win7 x86
+
+on:
+  workflow_dispatch: # 手动触发构建
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          ref: v0.12.1 # 锁定你需要的兼容 Win7 的版本
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          # 重要：必须使用 Go 1.20.x，这是支持 Windows 7 的最后一个主版本
+          go-version: '1.20.14' 
+          check-latest: true
+
+      - name: Install Dependencies
+        run: |
+          go mod download
+
+      - name: Build Kopia CLI (x86)
+        env:
+          GOOS: windows
+          GOARCH: 386 # 指定 32 位架构
+          CGO_ENABLED: 0 # 关闭 CGO 以获得最大的可移植性
+        run: |
+          # 提取版本号和构建信息，写入编译标志
+          BUILD_TIME=$(date -u +%Y%m%d-%H%M%S)
+          LDFLAGS="-s -w -X github.com/kopia/kopia/repo.BuildVersion=0.12.1-win7-x86 -X github.com/kopia/kopia/repo.BuildInfo=$BUILD_TIME"
+          
+          # 执行编译，输出为 kopia.exe
+          go build -o kopia.exe -ldflags "$LDFLAGS" .
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kopia-win7-x86-cli
+          path: kopia.exe
