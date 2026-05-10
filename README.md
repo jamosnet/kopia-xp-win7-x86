@@ -91,6 +91,18 @@ kopia.exe snapshot create C:\ --override-source="%KOPIA_SOURCE%"
 ###  docker的安装
 参考官方文档    https://kopia.io/docs/installation/#docker-images
 
+## 🤝 参与贡献与交流
+
+如果你觉得这个项目帮到了你，或者你对kopia备份方案有兴趣，**请务必点个 Star ⭐️ 支持一下！**
+
+非常欢迎提交 Issue 和 Pull Request，让我们一起把它做得更好！
+
+*   **GitHub**: [@jamosnet](https://github.com/jamosnet)
+*   **邮箱**: jamosnet@outlook.com
+*   **QQ**: **8185250**  (备注: kopia)
+
+
+
 ---
 
 ---
