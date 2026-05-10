@@ -1,3 +1,96 @@
+
+# Kopia Legacy & Dynamic VM Backup Solution
+
+本仓库是基于 [Kopia](https://github.com/kopia/kopia) 的一个特殊 Fork 分支，旨在解决 **Windows XP (x86)** 和 **Windows 7 (x86)** 环境下，针对大规模动态虚拟机（VM）的自动备份需求。
+
+> **核心背景**：Kopia 官方目前已不再提供 x86 (32位) 的预编译版本。为了支持老旧系统及特定的 x86 架构环境，本仓库通过定制的 GitHub Actions 重新实现了对这些平台的编译支持。
+
+## 🌟 核心特性
+
+- **跨代支持**：提供专为 XP（Go-nt51 补丁链）和 Win7（Go 1.20 链）编译的 `kopia.exe` 32位客户端。
+- **动态 VM 适配**：采用 `KOPIA_SOURCE` 环境变量 + `--override-source` 参数，解决 100+ 动态虚拟机在同一 Server 端的标识冲突。
+- **轻量级调度**：内置由 Delphi 7 开发的托盘启动器 (`kopia_backup_cron.exe`)，无需复杂的 Windows 任务计划程序即可实现定时后台备份。
+- **极致兼容的 VSS 支持**：通过 Batch 脚本自动强制管理员权限，确保在旧系统上也能调用卷影复制（VSS）备份被占用的文件。
+
+## 📁 目录结构与版本说明
+
+针对不同系统，本方案分为三个核心套件：
+
+| 目录名称 | 适用系统 | 编译引擎/特性 |
+| :--- | :--- | :--- |
+| `kopia-0.22.3-windows-64` | Win10/Win11 x64 | 官方核心版本 |
+| `kopia-win7-x86-cli` | Windows 7 x86 | Go 1.20.14 (官方支持 Win7 的最后版本) |
+| `kopia-winxp-x86-cli` | Windows XP x86 | Go-nt51 补丁 + `softfloat` (兼容老旧 CPU) |
+
+每个目录下均包含：
+- `kopia.exe`: 定制编译的客户端。
+- `kopia_backup.bat`: 封装好的逻辑脚本。
+- `kopia_backup_cron.exe`: 托盘调度程序。
+
+## 🚀 关键逻辑实现
+
+### 1. 动态源标识（解决多虚拟机冲突）
+为了在不修改物理机名的情况下区分 100 多台虚拟机，我们在脚本中定义了：
+```batch
+set VM_NAME=Your_Unique_VM_ID
+set KOPIA_SOURCE=vps@%VM_NAME%:C:
+...
+kopia.exe snapshot create C:\ --override-source="%KOPIA_SOURCE%"
+```
+*注：在 XP 系统中由于缺失 mklink，建议为每台设备在 Kopia Server 上分配独立的 User 账号。*
+
+### 2. 极致的排除规则
+为了减小备份体积，脚本默认排除了系统冗余文件（Windows 目录、Program Files、缓存、页面文件等），仅保护核心业务数据。
+
+### 3. XP 兼容性修正
+- **架构**：强制使用 `386` 架构。
+- **浮点运算**：开启 `softfloat`，确保在不支持 SSE2 的极老 CPU 上也能正常运行。
+- **权限管理**：脚本内置 `net session` 检测，确保以管理员身份运行以调用 VSS。
+
+## 📸 运行截图
+*(此处建议放入你准备好的三张截图：1. XP 运行截图；2. Win7 运行截图；3. Delphi 调度器托盘截图)*
+
+![Kopia Logo](./00ExtraRes/xp.png "Kopia 自动备份调度器在winxp上的截图")
+
+![Kopia Logo](./00ExtraRes/Snapshots-webui.png "KopiaUI v20260505.0.25120")
+
+![Kopia Logo](https://example.com/images/kopia.png "Kopia 自动备份调度器")
+
+## 🛠 如何构建 (GitHub Actions)
+本项目在 `.github/workflows` 中提供了两套自动化构建流程：
+- `build-win7-x86.yml`: 手动触发，产出 Win7 兼容版。
+- `build-winxp-x86.yml`: 手动触发，使用 Backports 分支产出 XP 兼容版。
+### 特别提醒，在创建yml前需要把原来的action全部设置为disabled ，否则在我们提交yml的时候会立即启动10几个自动构建
+
+![actionslist.png](./00ExtraRes/actionslist.png "actionslist.png")
+
+点击按钮Run workflow
+![Run workflow.png](./00ExtraRes/Run%20workflow.png "点击按钮Run workflow.png")
+
+大概3分钟构建好，然后展开找到 Artifact download URL ，点击即可下载
+![Artifact download URL.png](./00ExtraRes/Artifact%20download%20URL.png "Artifact download URL.png")
+
+
+---
+
+### 💡 为什么不直接用官方版？
+1. **官方无 x86**：新版本 Kopia 基本不再发布 32 位程序。
+2. **Go 环境限制**：Go 1.21+ 编写的程序无法在 Win7 以下运行。
+3. **XP 支持断层**：只有通过特定的补丁版 Go 编译器，才能让 Kopia 这种现代备份工具跑在 XP 上。
+
+---
+[下载 Kopia 自动备份调度器的delphi7源码.zip](./Kopia%20自动备份调度器.zip)
+
+[下载 kopia-0.22.3-windows-x64.zip](./00ExtraRes/kopia-0.22.3-windows-x64.zip)
+[下载 kopia-win7-x86-cli.zip](./00ExtraRes/kopia-win7-x86-cli.zip)
+[下载 kopia-winxp-x86-cli.zip](./00ExtraRes/kopia-winxp-x86-cli.zip)
+
+
+###  docker的安装
+参考官方文档    https://kopia.io/docs/installation/#docker-images
+
+---
+
 Kopia
 =====
 
