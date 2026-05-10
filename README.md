@@ -48,13 +48,12 @@ kopia.exe snapshot create C:\ --override-source="%KOPIA_SOURCE%"
 - **权限管理**：脚本内置 `net session` 检测，确保以管理员身份运行以调用 VSS。
 
 ## 📸 运行截图
-*(此处建议放入你准备好的三张截图：1. XP 运行截图；2. Win7 运行截图；3. Delphi 调度器托盘截图)*
 
 ![Kopia Logo](./00ExtraRes/xp.png "Kopia 自动备份调度器在winxp上的截图")
 
 ![Kopia Logo](./00ExtraRes/Snapshots-webui.png "KopiaUI v20260505.0.25120")
 
-![Kopia Logo](https://example.com/images/kopia.png "Kopia 自动备份调度器")
+
 
 ## 🛠 如何构建 (GitHub Actions)
 本项目在 `.github/workflows` 中提供了两套自动化构建流程：
@@ -79,15 +78,20 @@ kopia.exe snapshot create C:\ --override-source="%KOPIA_SOURCE%"
 3. **XP 支持断层**：只有通过特定的补丁版 Go 编译器，才能让 Kopia 这种现代备份工具跑在 XP 上。
 
 ---
-[下载 Kopia 自动备份调度器的delphi7源码.zip](./Kopia%20自动备份调度器.zip)
+[下载 Kopia 自动备份调度器的delphi7源码.zip](./00ExtraRes/Kopia%20自动备份调度器.zip)
 
 [下载 kopia-0.22.3-windows-x64.zip](./00ExtraRes/kopia-0.22.3-windows-x64.zip)
+
 [下载 kopia-win7-x86-cli.zip](./00ExtraRes/kopia-win7-x86-cli.zip)
+
 [下载 kopia-winxp-x86-cli.zip](./00ExtraRes/kopia-winxp-x86-cli.zip)
+
 
 
 ###  docker的安装
 参考官方文档    https://kopia.io/docs/installation/#docker-images
+
+---
 
 ---
 
