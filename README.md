@@ -78,7 +78,7 @@ kopia.exe snapshot create C:\ --override-source="%KOPIA_SOURCE%"
 3. **XP 支持断层**：只有通过特定的补丁版 Go 编译器，才能让 Kopia 这种现代备份工具跑在 XP 上。
 
 ---
-[下载 Kopia 自动备份调度器的delphi7源码.zip](./00ExtraRes/Kopia%20自动备份调度器.zip)
+[下载 Kopia 自动备份调度器的delphi7源码.zip](./00ExtraRes/delphi-kopia_backup_cron/Kopia%20自动备份调度器.zip)
 
 [下载 kopia-0.22.3-windows-x64.zip](./00ExtraRes/kopia-0.22.3-windows-x64.zip)
 
