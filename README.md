@@ -91,6 +91,8 @@ kopia.exe snapshot create C:\ --override-source="%KOPIA_SOURCE%"
 ###  docker的安装
 参考官方文档    https://kopia.io/docs/installation/#docker-images
 
+[Kopia 容错机制 (ECC) 深度测试与缺陷剖析报告](./00ExtraRes/kopia-ecc-deep-analysis.md)
+
 ## 🤝 参与贡献与交流
 
 如果你觉得这个项目帮到了你，或者你对kopia备份方案有兴趣，**请务必点个 Star ⭐️ 支持一下！**
